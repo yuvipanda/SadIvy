@@ -22,7 +22,7 @@ def tweet(msg):
     data = json.loads(msg.body)
     user = users.find_one({'Number':data['Number']})
     if user:
-        api = twitter.Api(username=user['Username'], password=user['Password'])    
+        api = twitter.Api(username=user['Username'], password=user['Password'])
         if len(data['Text']) > 140:
             text = data['Text'][:139]
         else:
@@ -30,7 +30,15 @@ def tweet(msg):
         api.PostUpdate(text)
         print text
     else:
-        print "Message %s from %s ignored" % (data['Text'], data['Number'])
+        if data['Text'].startswith('r'):
+            username, password = data['Text'].split()[1:3]
+            user = {'Number': data['Number'],
+                    'Username': username,
+                    'Password': password}
+            users.insert(user)
+            print "Inserted %s" % username
+        else:
+            print "Message %s from %s ignored" % (data['Text'], data['Number'])
     chan.basic_ack(msg.delivery_tag)
 
 chan.basic_consume(queue="tweets", callback=tweet, consumer_tag="tweetertag")

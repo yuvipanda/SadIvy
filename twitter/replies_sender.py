@@ -16,6 +16,7 @@ users = db.users
 
 for u in users.find():
     api = twitter.Api(username=u['Username'], password=u['Password'])
+    print "Replies for %s" % u['Username']
     if not 'since_id' in u:
         replies = api.GetReplies()
     else:
